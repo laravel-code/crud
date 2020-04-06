@@ -1,5 +1,4 @@
-![build passes](https://api.travis-ci.org/lemonCMS/laravel-crud.svg?branch=master)
-![PHP Composer](https://github.com/lemonCMS/laravel-crud/workflows/PHP%20Composer/badge.svg)
+![PHP Composer](https://github.com/laravel-code/crud/workflows/PHP%20Composer/badge.svg)
 
 # -------- WORK IN PROGRESS --------
 
