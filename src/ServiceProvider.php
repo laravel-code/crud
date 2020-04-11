@@ -9,11 +9,10 @@ use LaravelCode\Crud\Commands\CrudGenerator;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__.'/config/crud.php' => config_path('crud.php'),
-            __DIR__.'/config/oauth.php' => config_path('middleware.php'),
         ]);
 
         $this->loadViewsFrom(__DIR__.'/resources/views', 'crud');
@@ -32,7 +31,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             'LaravelCode\Crud\Listeners\CrudLogListener');
     }
 
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(
             __DIR__.'/config/crud.php', 'crud'
