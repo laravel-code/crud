@@ -60,8 +60,8 @@ class CrudEvents extends Command
 
             $this->renderEvent('event', $event);
             $this->renderEvent('listener', $event);
-            $this->renderEvent('model', config('crud.model.plural') ? \Str::plural($event) : \Str::singular($event));
-            $this->renderEvent('policy', config('crud.model.plural') ? \Str::plural($event) : \Str::singular($event));
+            $this->renderEvent('model', $event);
+            $this->renderEvent('policy', $event);
         }
     }
 
@@ -70,8 +70,10 @@ class CrudEvents extends Command
         $template = View::make('crud::generators.events.'.$type, $event);
 
         if ($type === 'model') {
+            $event['model'] = config('crud.model.plural') ? \Str::plural($event['model']) : \Str::singular($event['model']);
             $path = $this->getPath('Models');
         } elseif ($type === 'policy') {
+            $event['policy'] = config('crud.model.plural') ? \Str::plural($event['policy']) : \Str::singular($event['policy']);
             $path = $this->getPath(['Models', 'Policies']);
         } else {
             $path = $this->getPath([\Str::Studly(\Str::plural($type)), $event['path']]);
