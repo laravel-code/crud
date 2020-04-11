@@ -55,29 +55,21 @@ JSON;
 
         $path = (realpath(__DIR__.'/../../test-data')).'/api.php';
 
-        $this->artisan('crud:generate', [
+        $this->artisan('crud:routes', [
             '--output' => $path,
             '--always' => true,
         ]);
 
         $this->assertFileExists($path);
         File::delete($path);
-
-//        $content = File::get($path);
-//        preg_match("/^(.*)\:\:(.*)\(\'(.*)\',\s\'(.*)\'\)/m", $content, $matches);
-//        $this->assertEquals('Route', $matches[1]);
-//        $this->assertEquals('resource', $matches[2]);
-//        $this->assertEquals('users', $matches[3]);
-//        $this->assertEquals('Api\UsersController', $matches[4]);
-//        File::delete($path);
     }
 
     /** @test */
     public function testUnknownConfig()
     {
         $this->expectException(Exception::class);
-        $this->artisan('crud:generate', [
-            '--config' => 'somthing.json',
+        $this->artisan('crud:routes', [
+            '--config' => 'something.json',
         ]);
     }
 
@@ -107,7 +99,7 @@ JSON;
 
         $path = (realpath(__DIR__.'/../../test-data')).'/api.php';
 
-        $this->artisan('crud:generate', [
+        $this->artisan('crud:routes', [
             '--output' => $path,
             '--always' => true,
         ]);

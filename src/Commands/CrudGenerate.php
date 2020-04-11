@@ -46,8 +46,8 @@ class CrudGenerate extends Command
      */
     public function handle()
     {
-        Artisan::call('crud:routes', $this->options());
-        Artisan::call('crud:controllers', $this->options());
-        Artisan::call('crud:events', $this->options());
+        Artisan::call('crud:routes');
+        Artisan::call('crud:controllers');
+        Artisan::call('crud:events');
     }
 }

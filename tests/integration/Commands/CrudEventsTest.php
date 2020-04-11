@@ -60,7 +60,7 @@ JSON;
     public function testUnknownConfig()
     {
         $this->expectException(Exception::class);
-        $this->artisan('crud:generate', [
+        $this->artisan('crud:events', [
             '--config' => 'something.json',
         ]);
     }
