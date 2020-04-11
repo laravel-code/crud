@@ -3,15 +3,11 @@
 namespace LaravelCode\Crud\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
 
-class CrudGenerator extends Command
+class CrudGenerate extends Command
 {
     use CrudCommandTrait;
-
-    private $path;
-    private $config;
 
     /**
      * The name and signature of the console command.
@@ -24,13 +20,14 @@ class CrudGenerator extends Command
     {--config= : Location of your custom config file}
     {--output= : full pathname to write the api routes to}
     {--config= : Custom config file}';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Parse json and generate api routes';
+    private $path;
+    private $config;
 
     /**
      * Create a new command instance.
@@ -49,21 +46,8 @@ class CrudGenerator extends Command
      */
     public function handle()
     {
-        $json = $this->loadConfig();
-
-        $routes = "<?php\r\n".\View::make('crud::generators.route', ['data' => $json]);
-        $routes = preg_replace('/\t+/', ' ', $routes);
-
-        // $routes = trim(preg_replace('/\s+/', ' ', $routes));
-        $routes = str_replace([') ->', '; '], [')->', ";\r\n"], $routes);
-
-        $output = $this->option('output') ?: base_path('routes/api.php');
-
-        if (\File::exists($output) && ! $this->getConfirmation($output)) {
-            $this->error('File already exists'.$output);
-
-            return;
-        }
-        \File::put($output, $routes);
+        Artisan::call('crud:routes', $this->options());
+        Artisan::call('crud:controllers', $this->options());
+        Artisan::call('crud:events', $this->options());
     }
 }

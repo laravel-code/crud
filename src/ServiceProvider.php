@@ -5,7 +5,8 @@ namespace LaravelCode\Crud;
 use Illuminate\Support\Facades\Event;
 use LaravelCode\Crud\Commands\CrudControllers;
 use LaravelCode\Crud\Commands\CrudEvents;
-use LaravelCode\Crud\Commands\CrudGenerator;
+use LaravelCode\Crud\Commands\CrudGenerate;
+use LaravelCode\Crud\Commands\CrudRoutes;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -21,7 +22,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             $this->loadViewsFrom(__DIR__.'/resources/views', 'laravelCrud');
 
             $this->commands([
-                CrudGenerator::class,
+                CrudGenerate::class,
+                CrudRoutes::class,
                 CrudEvents::class,
                 CrudControllers::class,
             ]);
