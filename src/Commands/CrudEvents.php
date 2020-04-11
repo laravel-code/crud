@@ -56,10 +56,12 @@ class CrudEvents extends Command
     private function render()
     {
         foreach ($this->events as $event) {
+
+
             $this->renderEvent('event', $event);
             $this->renderEvent('listener', $event);
-            $this->renderEvent('model', $event);
-            $this->renderEvent('policy', $event);
+            $this->renderEvent('model', config('crud.model.plural') ? \Str::plural($event) : \Str::singular($event));
+            $this->renderEvent('policy', config('crud.model.plural') ? \Str::plural($event) : \Str::singular($event));
         }
     }
 
