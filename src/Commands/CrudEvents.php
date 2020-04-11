@@ -56,8 +56,6 @@ class CrudEvents extends Command
     private function render()
     {
         foreach ($this->events as $event) {
-
-
             $this->renderEvent('event', $event);
             $this->renderEvent('listener', $event);
             $this->renderEvent('model', $event);
