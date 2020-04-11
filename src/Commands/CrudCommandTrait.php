@@ -117,6 +117,9 @@ trait CrudCommandTrait
             $type = $values['type'] ?? 'action';
             switch ($type) {
                 case 'group':
+                    $tmpData['namespace'] = ($data['namespace'] ?? '').(! empty($data['namespace']) ? '\\' : '').($values['options']['namespace'] ?? '');
+                    $this->parseJson($values['routes'], $tmpData);
+                    break;
                 case 'middleware':
                 case 'namespace':
                     $tmpData['namespace'] = ($data['namespace'] ?? '').(! empty($data['namespace']) ? '\\' : '').($values['namespace'] ?? '');
