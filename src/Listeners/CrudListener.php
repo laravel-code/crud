@@ -61,8 +61,7 @@ abstract class CrudListener
         $this->request = $request;
         $this->response = $response;
         $this->className = __CLASS__;
-
-        $this->setModel();
+        $this->model = $this->setModel();
     }
 
     /**
@@ -72,7 +71,7 @@ abstract class CrudListener
     public function process(AbstractCrudEvent $event)
     {
         $this->event = $event;
-        $this->model = $this->event->getModel() ?: $this->setModel();
+        $this->model = $this->model ?: $this->event->getModel();
 
         if (null === $this->model) {
             throw new ListenerModelException('Model for listener '.get_called_class().' is not set correctly.');
@@ -256,5 +255,6 @@ abstract class CrudListener
 
     protected function setModel()
     {
+        return false;
     }
 }
