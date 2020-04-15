@@ -102,7 +102,7 @@ trait CrudControllerTrait
         ];
 
         if (! isset($this->model) || null === $this->model) {
-            $this->model = $this->combine('models', $resource);
+            $this->model = $this->setModel() ?: $this->combine('models', $resource);
         }
 
         if (null === $this->model) {
@@ -468,11 +468,11 @@ trait CrudControllerTrait
      * e.g. $this->setModel(\User::class);
      *
      *
-     * @param string $model
+     * @return string|bool
      */
-    protected function setModel(string $model)
+    protected function setModel()
     {
-        $this->model = $model;
+        return false;
     }
 
     /**

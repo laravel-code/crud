@@ -9,8 +9,8 @@ class NoListenerController extends AbstractController
 {
     use CrudControllerTrait;
 
-    protected function initCrud()
+    protected function setModel()
     {
-        $this->setModel(Blog::class);
+        return Blog::class;
     }
 }
