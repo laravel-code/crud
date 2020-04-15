@@ -362,33 +362,6 @@ class ControllerTest extends TestCase
         $this->assertInstanceOf(MissingListenerException::class, $response->exception);
     }
 
-    public function testValidatorOk()
-    {
-        $response = $this->postJson('api/blogs/validator', [
-            'title' => 'Bingo',
-            'description' => 'Bingo',
-        ]);
-        $response->assertOk();
-        $response->assertJson(['ok']);
-    }
-
-    public function testValidator422()
-    {
-        $response = $this->postJson('api/blogs/validator', []);
-        $response->assertStatus(422);
-        $response->assertJson([
-            'message' => 'The given data was invalid.',
-            'errors' => [
-                'title' => [
-                    'The title field is required.',
-                ],
-                'description' => [
-                    'The description field is required.',
-                ],
-            ],
-        ]);
-    }
-
     public function tearDown(): void
     {
         parent::tearDown();
@@ -434,7 +407,6 @@ class ControllerTest extends TestCase
         }]);
 
         $app['router']->resource('api/blogs', '\TestApp\Http\Controllers\BlogController');
-        $app['router']->post('api/blogs/validator', '\TestApp\Http\Controllers\BlogController@testValidator');
         $app['router']->resource('api/does-not-work', '\TestApp\Http\Controllers\DoesNotWork');
         $app['router']->resource('api/no-model', '\TestApp\Http\Controllers\NoModelController');
         $app['router']->resource('api/no-event', '\TestApp\Http\Controllers\NoEventController');

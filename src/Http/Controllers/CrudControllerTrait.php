@@ -216,16 +216,6 @@ trait CrudControllerTrait
         }
     }
 
-    public function validate(string $event, Request $request)
-    {
-        if (is_callable([$event, 'rules'])) {
-            $validator = Validator::make($request->all(), call_user_func([$event, 'rules'], $request));
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-        }
-    }
-
     /**
      * Show paginated resources
      * Override this in your controller for custom logic.
