@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LaravelCode\Crud\Events\AbstractCrudEvent;
 use LaravelCode\Crud\Events\CrudEventLogger;
+use LaravelCode\Crud\Exceptions\ListenerModelException;
 
 abstract class CrudListener
 {
@@ -60,21 +61,21 @@ abstract class CrudListener
         $this->request = $request;
         $this->response = $response;
         $this->className = __CLASS__;
+
+        $this->setModel();
     }
 
     /**
      * @param AbstractCrudEvent $event
+     * @throws ListenerModelException
      */
     public function process(AbstractCrudEvent $event)
     {
         $this->event = $event;
+        $this->model = $this->event->getModel() ?: $this->setModel();
 
         if (null === $this->model) {
-            $this->model = $this->event->getModel() ?: null;
-        }
-
-        if (null === $this->model) {
-            return;
+            throw new ListenerModelException('Model for listener '.get_called_class().' is not set correctly.');
         }
 
         if (null === $event->getId()) {
@@ -250,6 +251,10 @@ abstract class CrudListener
     }
 
     protected function afterRestore()
+    {
+    }
+
+    protected function setModel()
     {
     }
 }
