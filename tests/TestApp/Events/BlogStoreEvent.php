@@ -2,6 +2,8 @@
 
 namespace TestApp\Events;
 
+use Illuminate\Http\Request;
+
 class BlogStoreEvent extends BaseBlogEvent
 {
     /**
