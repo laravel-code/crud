@@ -24,7 +24,7 @@ class CrudEventLogger implements ShouldQueue
     public function __construct(string $event, array $payload)
     {
         $this->event = $event;
-        $payload = $this->replaceValue($payload, 'password', '*************');
+        $payload = $this->replaceValue($payload, 'password', '********');
 
         $this->payload = $payload + [
                 'meta' => [

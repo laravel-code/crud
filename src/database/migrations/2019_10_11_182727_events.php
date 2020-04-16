@@ -17,6 +17,8 @@ class Events extends Migration
             $table->bigIncrements('id');
             $table->string('event')->index();
             $table->json('payload');
+            $table->bigInteger('entity_id')->nullable();
+            $table->bigInteger('version')->nullable();
             $table->string('checksum');
             $table->timestamps();
         });
