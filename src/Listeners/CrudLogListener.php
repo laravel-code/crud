@@ -24,6 +24,7 @@ class CrudLogListener implements ShouldQueue
         // save in DB
         $entity = new EventsTable();
         $entity->event = $event->event;
+        $entity->entity_id = $event->payload['id'] ?? null;
         $entity->payload = $payload;
         $entity->created_at = $createdAt;
         $entity->checksum = bcrypt($checksum);

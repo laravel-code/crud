@@ -201,7 +201,7 @@ abstract class CrudListener
     public function logEvent(AbstractCrudEvent $event = null): void
     {
         if (null === $event && $this->event) {
-            event(new CrudEventLogger(get_class($this->event), $this->event->jsonSerialize() + ['id' => $this->entity->id]));
+            event(new CrudEventLogger(get_class($this->event), array_merge($this->event->jsonSerialize(), ['id' => $this->entity->id])));
 
             return;
         }
