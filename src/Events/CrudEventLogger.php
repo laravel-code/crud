@@ -24,9 +24,8 @@ class CrudEventLogger implements ShouldQueue
     public function __construct(string $event, array $payload)
     {
         $this->event = $event;
-        if (isset($payload['password'])) {
-            $payload['password'] = '*********';
-        }
+        $payload = $this->replaceValue($payload, 'password', '*************');
+
         $this->payload = $payload + [
                 'meta' => [
                     'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
@@ -34,5 +33,29 @@ class CrudEventLogger implements ShouldQueue
                     'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
                 ],
             ];
+    }
+
+    /**
+     * Replace all found keys with a given value
+     * in a multi dimensional associative array.
+     *
+     * @param array $payload
+     * @param string $key
+     * @param null $newValue
+     * @return array
+     */
+    public function replaceValue(array $payload, string $key, $newValue = null)
+    {
+        return collect($payload)->map(function ($item, $vKey) use ($key, $newValue) {
+            if ($vKey === $key) {
+                return $newValue;
+            }
+
+            if (is_array($item)) {
+                return $this->replaceValue($item, $key, $newValue);
+            }
+
+            return $item;
+        })->toArray();
     }
 }
