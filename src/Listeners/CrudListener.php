@@ -188,7 +188,7 @@ abstract class CrudListener
      * @param $response
      * @param int $statusCode
      */
-    protected function sendResponse(Model $response, $statusCode = 200): void
+    protected function sendResponse($response, $statusCode = 200): void
     {
         $this->response->setContent($response)
             ->setStatusCode($statusCode)
