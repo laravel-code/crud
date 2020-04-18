@@ -5,16 +5,12 @@ namespace TestApp\Events;
 use Illuminate\Http\Request;
 use LaravelCode\Crud\Events\CrudEvent;
 
-class BaseBlogEvent extends CrudEvent
+class TagStoreEvent extends CrudEvent
 {
     /**
      * @var string
      */
-    public $title;
-    /**
-     * @var string
-     */
-    public $description;
+    public $tag;
 
     /**
      * AccountUpdate constructor.
@@ -22,28 +18,25 @@ class BaseBlogEvent extends CrudEvent
      * @param $id
      * @param string $model
      * @param string $tag
-     * @param string $description
      */
-    public function __construct($id, string $model, string $tag, string $description)
+    public function __construct($id, string $model, string $tag)
     {
         parent::__construct($id, $model);
-        $this->title = $tag;
-        $this->description = $description;
+        $this->tag = $tag;
     }
 
     /**
      * @param $id
      * @param string $model
      * @param array $payload
-     * @return BaseBlogEvent
+     * @return CrudEvent|static
      */
     public static function fromPayload($id, string $model, array $payload)
     {
         return new static(
             null,
             $model,
-            $payload['title'],
-            $payload['description']
+            $payload['title']
         );
     }
 
@@ -53,12 +46,9 @@ class BaseBlogEvent extends CrudEvent
      */
     public static function rules(Request $request): array
     {
-        $rules = [
-            'title' => 'required',
-            'description' => 'required',
+        return [
+            'tag' => 'required',
         ];
-
-        return static::linkValidators($rules, $request);
     }
 
     /**
@@ -68,24 +58,15 @@ class BaseBlogEvent extends CrudEvent
     {
         return [
             'id' => $this->getId(),
-            'title' => $this->getTitle(),
-            'description' => $this->getDescription(),
+            'tag' => $this->getTag(),
         ];
     }
 
     /**
      * @return string
      */
-    public function getTitle(): string
+    public function getTag(): string
     {
-        return $this->title;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        return $this->description;
+        return $this->tag;
     }
 }

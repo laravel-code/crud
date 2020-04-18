@@ -20,4 +20,25 @@ class BlogStoreEvent extends BaseBlogEvent
             $payload['description']
         );
     }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public static function rules(Request $request): array
+    {
+        $rules = [
+            'title' => 'required',
+            'description' => 'required',
+        ];
+
+        return static::linkValidators($rules, $request);
+    }
+
+    public static function chainEvents()
+    {
+        return [
+            'tags.*' => TagStoreEvent::class,
+        ];
+    }
 }
