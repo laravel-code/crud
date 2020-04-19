@@ -3,6 +3,7 @@
 namespace LaravelCode\Crud;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Validator;
 use LaravelCode\Crud\Commands\CrudControllers;
 use LaravelCode\Crud\Commands\CrudEvents;
 use LaravelCode\Crud\Commands\CrudGenerate;
@@ -31,6 +32,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         Event::listen('LaravelCode\Crud\Events\CrudEventLogger',
             'LaravelCode\Crud\Listeners\CrudLogListener');
+
+        Validator::extend('chained', function () {
+            return true;
+        });
     }
 
     public function register(): void

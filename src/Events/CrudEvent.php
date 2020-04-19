@@ -4,32 +4,24 @@ namespace LaravelCode\Crud\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
-use Request;
 
 abstract class CrudEvent extends AbstractCrudEvent
 {
     use Dispatchable;
     use InteractsWithSockets;
     use SerializesModels;
-    /**
-     * @var mixed
-     */
+
     public $id;
-    /**
-     * @var string
-     */
     public $model;
-    /**
-     * @var array
-     */
     public $requestParams;
 
-    public function __construct($id,string $model)
+    public function __construct($id, $model)
     {
         $this->id = $id;
         $this->model = $model;
-        $this->requestParams = Request::all();
+        $this->requestParams = app()->get(Request::class)->all();
     }
 
     /**
@@ -46,6 +38,14 @@ abstract class CrudEvent extends AbstractCrudEvent
     public function getModel()
     {
         return $this->model;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRequestParams()
+    {
+        return $this->requestParams;
     }
 
     /**
@@ -83,13 +83,40 @@ abstract class CrudEvent extends AbstractCrudEvent
     }
 
     /**
+     * Append multiple validators.
+     * Get rules from other events and append
+     * them too the rules of this event.
+     *
+     * {
+     *      "organization": "Laravel-code",
+     *      "users: [
+     *          {"username": "user 1},
+     *          {"username": "user 2},
+     *       ]
+     * }
+     *
+     * Within the rules of Organization import the rules for creating a user.
+     *
+     * $userRules = static::linkValidators('users.*', UserCreateEvent::rules);
+     *
+     * return [
+     *  'organization' => 'required',
+     * ] + $userRules;
+     *
      * @param array $rules
-     * @param $events
+     * @param string $prefix
+     * @param array $newRules
+     * @return mixed
+     */
+
+    /**
+     * @param array $rules
+     * @param Request $request
      * @return array|mixed
      */
-    public static function linkValidators(array $rules, $request)
+    public static function linkValidators(array $rules, Request $request)
     {
-        foreach(static::chainEvents() as $key => $event) {
+        foreach (static::chainEvents() as $key => $event) {
             $newRules = call_user_func([$event, 'rules'], $request);
             $rules = $rules + static::makeValidatorRules($key, $newRules);
         }
@@ -102,9 +129,20 @@ abstract class CrudEvent extends AbstractCrudEvent
      * @param array $rules
      * @return mixed
      */
-    private static function makeValidatorRules(string $prefix, array $rules) {
+    private static function makeValidatorRules(string $prefix, array $rules)
+    {
         return collect($rules)->map(function ($value, $key) use ($prefix) {
             return [$prefix.'.'.$key => $value];
+        })->filter(function ($values) {
+            $value = array_values($values)[0];
+            switch (gettype($value)) {
+                case 'string':
+                    return ! stristr($value, 'chained');
+                case 'array':
+                    return ! in_array('chained', $value);
+                default:
+                    return true;
+            }
         })->reduce(function ($rules, $value) {
             if ($rules === null) {
                 $rules = [];
@@ -112,20 +150,14 @@ abstract class CrudEvent extends AbstractCrudEvent
             $rules[array_keys($value)[0]] = array_values($value)[0];
 
             return $rules;
-        });
+        }) ?: [];
     }
 
     /**
      * @return array
      */
-    public function getRequestParams() {
-        return $this->requestParams;
-    }
-
-    /**
-     * @return array
-     */
-    public static function chainEvents() {
+    public static function chainEvents()
+    {
         return [];
     }
 }
