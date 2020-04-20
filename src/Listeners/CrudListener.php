@@ -228,6 +228,33 @@ abstract class CrudListener
         $this->restore = $value;
     }
 
+    /**
+     * @param string $field
+     * @param $value
+     */
+    public function __set(string $field, $value)
+    {
+        $this->entity->{$field} = $value;
+    }
+
+    /**
+     * @param string $field
+     * @return mixed
+     */
+    public function __get(string $field)
+    {
+        return $this->entity->{$field};
+    }
+
+    /**
+     * @param $field
+     * @param $value
+     */
+    protected function setField($field, $value)
+    {
+        $this->entity->{$field} = $value;
+    }
+
     protected function beforeRun()
     {
     }
