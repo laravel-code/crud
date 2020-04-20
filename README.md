@@ -283,8 +283,35 @@ class BlogStoreListener extends CrudListener
 
 ````
 
+## Chaining events
+
+Sometimes it could be handy to chain events.
+
+Let say whe have an ```BlogCreateEvent``` and ```TagCreatEvent```
+They both have their own validator rules. We have the following json
+
+```json
+{
+	"title": "Project 3",
+	"description": "Description",
+	"active": true,
+	"tags": [
+		{
+			"name": "sheet 1",
+			"description": "Dit is de eerste pagina van de test",
+			"active": true
+		}
+	]
+	
+}
+
+```
+
+
+
+
+
 ## Todo
- - Testing policies, i was unable to get them to work
  - Implement Collection support
  - implement caching
  

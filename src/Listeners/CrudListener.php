@@ -147,7 +147,7 @@ abstract class CrudListener
             Log::debug('Finished  afterRun: ');
         }
 
-        if ($this->entity->isClean()) {
+        if (! $this->saveOnClean() && $this->entity->isClean()) {
             Log::debug('Entity is clean, skipping');
             $this->sendResponse($this->entity, 200);
 
@@ -254,6 +254,20 @@ abstract class CrudListener
     }
 
     protected function setModel()
+    {
+        return false;
+    }
+
+    /**
+     * Should the entity save be called when the enity is clean.
+     * By default it will not, but when you have could that is
+     * being executed e.g. beforeSave, afterSave and afterSaveFailed.
+     *
+     * return true to continue handling the saving.
+     *
+     * @return bool
+     */
+    protected function saveOnClean()
     {
         return false;
     }
