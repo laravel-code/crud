@@ -4,7 +4,7 @@ namespace LaravelCode\Crud\Events;
 
 use Illuminate\Http\Request;
 
-abstract class AbstractCrudEvent implements \JsonSerializable
+abstract class AbstractCrudEvent implements \JsonSerializable, CrudEventInterface
 {
     abstract public static function fromPayload($id, string $model, array $payload);
 
