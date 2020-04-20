@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LaravelCode\Crud\Events\AbstractCrudEvent;
+use LaravelCode\Crud\Events\CrudEventInterface;
 use LaravelCode\Crud\Events\CrudEventLogger;
 use LaravelCode\Crud\Exceptions\ListenerModelException;
 
@@ -80,7 +81,8 @@ abstract class CrudListener
         if (null === $event->getId()) {
             $this->entity = new $this->model();
             $this->run();
-            $this->logEvent();
+            $this->handleChainedEvents();
+            $this->handleLogEvent();
 
             return;
         }
@@ -94,7 +96,8 @@ abstract class CrudListener
         $this->entity = call_user_func([$this->model, $this->resourceLoader], $event->getId(), $this->request, $callback)->first();
 
         $this->run();
-        $this->logEvent();
+        $this->handleChainedEvents();
+        $this->handleLogEvent();
     }
 
     private function run()
@@ -198,7 +201,7 @@ abstract class CrudListener
     /**
      * @param AbstractCrudEvent|null $event
      */
-    public function logEvent(AbstractCrudEvent $event = null): void
+    public function handleLogEvent(AbstractCrudEvent $event = null): void
     {
         if (null === $event && $this->event) {
             event(new CrudEventLogger(get_class($this->event), array_merge($this->event->jsonSerialize(), ['id' => $this->entity->id])));
@@ -270,5 +273,42 @@ abstract class CrudListener
     protected function saveOnClean()
     {
         return false;
+    }
+
+    public function handleChainedEvents()
+    {
+        $events = get_class($this->event)::chainEvents();
+        if (count($events) === 0) {
+            return;
+        }
+
+        /**
+         * @var string $key
+         * @var CrudEventInterface $event
+         */
+        foreach ($events as $key => $event) {
+            if ('.*' === substr($key, -2)) {
+                $field = substr($key, 0, -2);
+                $model = config('crud.models.plural') ? Str::plural($field) : Str::Singular($field);
+                $model = Str::studly($model);
+                $model = config('crud.namespacePrefix.models').'\\'.$model;
+                collect($this->request->get($field, []))->each(function ($data) use ($model, $event) {
+                    $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
+                    event($event::fromPayload(null, $model, $data));
+                });
+                continue;
+            }
+
+            if ($this->request->has($key)) {
+                $model = config('crud.models.plural') ? Str::plural($key) : Str::Singular($key);
+                $model = Str::studly($model);
+                $model = config('crud.namespacePrefix.models').'\\'.$model;
+
+                $data = $this->request->get($key);
+                $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
+
+                event($event::fromPayload(null, $model, $data));
+            }
+        }
     }
 }
