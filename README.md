@@ -349,12 +349,11 @@ This gives you control over which Listeners should emit chainedEvents.
 
 use LaravelCode\Crud\Contracts\ChainedEvents;
 
-class StoreListener implements ChainedEvents {
+class BlogStoreListener extends CrudListener implements ChainedEvents {
 
 
 }
 ```
-
 
 ## Todo
  - Implement Collection support

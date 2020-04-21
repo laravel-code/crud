@@ -19,32 +19,71 @@ trait ChainedEventsTrait
             return;
         }
 
+        $requestData = $this->request->all();
+        if ($this->event instanceof ChainedEvents) {
+            $requestData = $this->event->getRequestParams();
+        }
+
         /**
          * @var string $key
          * @var CrudEventInterface $event
          */
         foreach ($events as $key => $event) {
             if ('.*' === substr($key, -2)) {
-                $field = substr($key, 0, -2);
+                $field = last(explode('.', substr($key, 0, -2)));
                 $model = config('crud.models.plural') ? Str::plural($field) : Str::Singular($field);
                 $model = Str::studly($model);
                 $model = config('crud.namespacePrefix.models').'\\'.$model;
-                collect($this->request->get($field, []))->each(function ($data) use ($model, $event) {
-                    $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
-                    event($event::fromPayload(null, $model, $data));
+                collect($requestData[$field] ?? [])->each(function ($data) use ($model, $event) {
+                    $modelIdField = Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id';
+                    $data[$modelIdField] = $this->entity->id;
+
+                    if ($this->event instanceof ChainedEvents) {
+                        $data = $data + $this->event->getModelIds();
+                    }
+
+                    $newEvent = $event::fromPayload(null, $model, $data);
+
+                    if ($newEvent instanceof ChainedEvents) {
+                        $newEvent->setRequestParams($data);
+                        $newEvent->addModelId($modelIdField, $this->entity->id);
+                    }
+
+                    if ($this->event instanceof ChainedEvents) {
+                        $newEvent->addModelId($this->event->getModelIds());
+                    }
+
+                    event($newEvent);
                 });
                 continue;
             }
 
-            if ($this->request->has($key)) {
-                $model = config('crud.models.plural') ? Str::plural($key) : Str::Singular($key);
+            $field = last(explode('.', $key));
+            if ($requestData[$field] ?? null) {
+                $model = config('crud.models.plural') ? Str::plural($field) : Str::Singular($field);
                 $model = Str::studly($model);
                 $model = config('crud.namespacePrefix.models').'\\'.$model;
+                $data = $requestData[$field];
 
-                $data = $this->request->get($key);
-                $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
+                if ($this->event instanceof ChainedEvents) {
+                    $data = $data + $this->event->getModelIds();
+                }
 
-                event($event::fromPayload(null, $model, $data));
+                $modelIdField = Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id';
+                $data[$modelIdField] = $this->entity->id;
+
+                $newEvent = $event::fromPayload(null, $model, $data);
+
+                if ($newEvent instanceof ChainedEvents) {
+                    $newEvent->setRequestParams($data);
+                    $newEvent->addModelId($modelIdField, $this->entity->id);
+                }
+
+                if ($this->event instanceof ChainedEvents) {
+                    $newEvent->addModelId($this->event->getModelIds());
+                }
+
+                event($newEvent);
             }
         }
     }

@@ -15,7 +15,8 @@ abstract class CrudEvent extends AbstractCrudEvent
 
     public $id;
     public $model;
-    public $requestParams;
+    public $requestParams = [];
+    private $modelIds = [];
 
     public function __construct($id, $model)
     {
@@ -102,18 +103,14 @@ abstract class CrudEvent extends AbstractCrudEvent
     /**
      * @return mixed
      */
-    public function getRequestParams()
+    public function getRequestParams(): array
     {
         return $this->requestParams;
     }
 
-    public function jsonSerialize()
+    public function setRequestParams(array $params): void
     {
-        return [
-            'id' => $this->getId(),
-            'model' => $this->getModel(),
-            'payload' => $this->toPayload(),
-        ];
+        $this->requestParams = $params;
     }
 
     /**
@@ -142,6 +139,14 @@ abstract class CrudEvent extends AbstractCrudEvent
      * @param array $newRules
      * @return mixed
      */
+    public function jsonSerialize()
+    {
+        return [
+            'id' => $this->getId(),
+            'model' => $this->getModel(),
+            'payload' => $this->toPayload(),
+        ];
+    }
 
     /**
      * @return int
@@ -172,5 +177,23 @@ abstract class CrudEvent extends AbstractCrudEvent
         return [
             'id' => $this->getId(),
         ];
+    }
+
+    public function addModelId($name, $value = null): void
+    {
+        if (typeOf($name) === 'string') {
+            $this->modelIds[$name] = $value;
+
+            return;
+        }
+
+        if (typeOf($name) === 'array') {
+            $this->modelIds = $this->modelIds + $name;
+        }
+    }
+
+    public function getModelIds(): array
+    {
+        return $this->modelIds;
     }
 }
