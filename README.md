@@ -1,7 +1,5 @@
 ![PHP Composer](https://github.com/laravel-code/crud/workflows/PHP%20Composer/badge.svg)
 
-# -------- WORK IN PROGRESS --------
-
 # CRUD & Event logging for laravel 6/7
 
 ## Why?
@@ -297,18 +295,65 @@ They both have their own validator rules. We have the following json
 	"active": true,
 	"tags": [
 		{
-			"name": "sheet 1",
-			"description": "Dit is de eerste pagina van de test",
+			"name": "tag 1",
+			"description": "some content",
 			"active": true
 		}
 	]
-	
 }
+```
 
+```BlogCreateEvent```
+```php
+
+class BlogCreateEvent extends CrudEvent {
+
+    public static function chainEvents()
+    {
+        return [
+            'tags.*' => TagsCreateEvent::class,
+        ];
+    }
+}
+```
+
+```TagCreateEvent``` 
+
+In the rules you see the ```chained``` validation rule, this rule will be used to ignore this field from validation.
+When the validation rules al processed, we do not yet have the blog_id, this id will get inserted from its caller class.
+
+This id field will consist of ```Str::snake(Str::singular($this->model))``` with suffix ```_id```
+
+```php
+
+class TagCreateEvent extends CrudEvent {
+
+    public static function rules(Request $request) : array
+    {
+        return [
+            'blog_id' => 'required|chained',
+            'name' => 'required',
+            'description' => 'required',
+            'active' => 'required|boolean',
+        ];
+    }
+
+}
 ```
 
 
+Add ```LaravelCode\Crud\Contracts\ChainedEvent``` contract on the ListenerClass.
+This gives you control over which Listeners should emit chainedEvents.
 
+```php
+
+use LaravelCode\Crud\Contracts\ChainedEvents;
+
+class StoreListener implements ChainedEvents {
+
+
+}
+```
 
 
 ## Todo
