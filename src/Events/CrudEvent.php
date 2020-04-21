@@ -24,38 +24,6 @@ abstract class CrudEvent extends AbstractCrudEvent
         $this->requestParams = app()->get(Request::class)->all();
     }
 
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRequestParams()
-    {
-        return $this->requestParams;
-    }
-
-    /**
-     * @param string $id
-     */
-    public function setId(string $id)
-    {
-        $this->id = $id;
-    }
-
     public static function fromPayload($id, string $model, array $payload)
     {
         return new static($id, $model);
@@ -66,49 +34,6 @@ abstract class CrudEvent extends AbstractCrudEvent
         return [];
     }
 
-    public function jsonSerialize()
-    {
-        return [
-            'id' => $this->getId(),
-            'model' => $this->getModel(),
-            'payload' => $this->toPayload(),
-        ];
-    }
-
-    public function toPayload(): array
-    {
-        return [
-            'id' => $this->getId(),
-        ];
-    }
-
-    /**
-     * Append multiple validators.
-     * Get rules from other events and append
-     * them too the rules of this event.
-     *
-     * {
-     *      "organization": "Laravel-code",
-     *      "users: [
-     *          {"username": "user 1},
-     *          {"username": "user 2},
-     *       ]
-     * }
-     *
-     * Within the rules of Organization import the rules for creating a user.
-     *
-     * $userRules = static::linkValidators('users.*', UserCreateEvent::rules);
-     *
-     * return [
-     *  'organization' => 'required',
-     * ] + $userRules;
-     *
-     * @param array $rules
-     * @param string $prefix
-     * @param array $newRules
-     * @return mixed
-     */
-
     /**
      * @param array $rules
      * @param Request $request
@@ -116,9 +41,22 @@ abstract class CrudEvent extends AbstractCrudEvent
      */
     public static function linkValidators(array $rules, Request $request)
     {
-        foreach (static::chainEvents() as $key => $event) {
+        return static::combineRules($rules, static::chainEvents(), $request);
+    }
+
+    /**
+     * @param array $rules
+     * @param array $chainedRules
+     * @param Request $request
+     * @return array|mixed
+     */
+    private static function combineRules(array $rules, array $chainedRules, Request $request)
+    {
+        foreach ($chainedRules as $key => $event) {
             $newRules = call_user_func([$event, 'rules'], $request);
-            $rules = $rules + static::makeValidatorRules($key, $newRules);
+            $rules = $rules +
+                static::makeValidatorRules($key, $newRules) +
+                static::makeValidatorRules($key, static::combineRules([], call_user_func([$event, 'chainEvents']), $request));
         }
 
         return $rules;
@@ -159,5 +97,80 @@ abstract class CrudEvent extends AbstractCrudEvent
     public static function chainEvents()
     {
         return [];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRequestParams()
+    {
+        return $this->requestParams;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'id' => $this->getId(),
+            'model' => $this->getModel(),
+            'payload' => $this->toPayload(),
+        ];
+    }
+
+    /**
+     * Append multiple validators.
+     * Get rules from other events and append
+     * them too the rules of this event.
+     *
+     * {
+     *      "organization": "Laravel-code",
+     *      "users: [
+     *          {"username": "user 1},
+     *          {"username": "user 2},
+     *       ]
+     * }
+     *
+     * Within the rules of Organization import the rules for creating a user.
+     *
+     * $userRules = static::linkValidators('users.*', UserCreateEvent::rules);
+     *
+     * return [
+     *  'organization' => 'required',
+     * ] + $userRules;
+     *
+     * @param array $rules
+     * @param string $prefix
+     * @param array $newRules
+     * @return mixed
+     */
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId(string $id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    public function toPayload(): array
+    {
+        return [
+            'id' => $this->getId(),
+        ];
     }
 }

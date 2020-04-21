@@ -12,9 +12,14 @@ use LaravelCode\Crud\Events\AbstractCrudEvent;
 use LaravelCode\Crud\Events\CrudEventInterface;
 use LaravelCode\Crud\Events\CrudEventLogger;
 use LaravelCode\Crud\Exceptions\ListenerModelException;
+use LaravelCode\Crud\Traits\ChainedEventsTrait;
+use LaravelCode\Crud\Traits\ListenerRunTrait;
 
 abstract class CrudListener
 {
+    use ListenerRunTrait,
+        ChainedEventsTrait;
+
     /**
      * @var string
      */
@@ -80,9 +85,7 @@ abstract class CrudListener
 
         if (null === $event->getId()) {
             $this->entity = new $this->model();
-            $this->run();
-            $this->handleChainedEvents();
-            $this->handleLogEvent();
+            $this->execute();
 
             return;
         }
@@ -94,13 +97,17 @@ abstract class CrudListener
         };
 
         $this->entity = call_user_func([$this->model, $this->resourceLoader], $event->getId(), $this->request, $callback)->first();
+        $this->execute();
+    }
 
-        $this->run();
+    private function execute()
+    {
+        $this->storeToDB();
         $this->handleChainedEvents();
         $this->handleLogEvent();
     }
 
-    private function run()
+    private function storeToDB()
     {
         if (is_callable([$this, 'beforeRun'])) {
             call_user_func([$this, 'beforeRun']);
@@ -210,132 +217,5 @@ abstract class CrudListener
         }
 
         event(new CrudEventLogger(get_class($event), $event->jsonSerialize()));
-    }
-
-    /**
-     * @param bool $value
-     */
-    protected function setDelete(bool $value = false): void
-    {
-        $this->delete = $value;
-    }
-
-    /**
-     * @param bool $value
-     */
-    protected function setRestore(bool $value = false): void
-    {
-        $this->restore = $value;
-    }
-
-    /**
-     * @param string $field
-     * @param $value
-     */
-    public function __set(string $field, $value)
-    {
-        $this->entity->{$field} = $value;
-    }
-
-    /**
-     * @param string $field
-     * @return mixed
-     */
-    public function __get(string $field)
-    {
-        return $this->entity->{$field};
-    }
-
-    /**
-     * @param $field
-     * @param $value
-     */
-    protected function setField($field, $value)
-    {
-        $this->entity->{$field} = $value;
-    }
-
-    protected function beforeRun()
-    {
-    }
-
-    protected function afterRun()
-    {
-    }
-
-    protected function beforeSave()
-    {
-    }
-
-    protected function afterSave()
-    {
-    }
-
-    protected function afterSaveFailed()
-    {
-    }
-
-    protected function afterDelete()
-    {
-    }
-
-    protected function afterRestore()
-    {
-    }
-
-    protected function setModel()
-    {
-        return false;
-    }
-
-    /**
-     * Should the entity save be called when the enity is clean.
-     * By default it will not, but when you have could that is
-     * being executed e.g. beforeSave, afterSave and afterSaveFailed.
-     *
-     * return true to continue handling the saving.
-     *
-     * @return bool
-     */
-    protected function saveOnClean()
-    {
-        return false;
-    }
-
-    public function handleChainedEvents()
-    {
-        $events = get_class($this->event)::chainEvents();
-        if (count($events) === 0) {
-            return;
-        }
-
-        /**
-         * @var string $key
-         * @var CrudEventInterface $event
-         */
-        foreach ($events as $key => $event) {
-            if ('.*' === substr($key, -2)) {
-                $field = substr($key, 0, -2);
-                $model = config('crud.models.plural') ? Str::plural($field) : Str::Singular($field);
-                $model = Str::studly($model);
-                $model = config('crud.namespacePrefix.models').'\\'.$model;
-                collect($this->request->get($field, []))->each(function ($data) use ($model, $event) {
-                    $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
-                    event($event::fromPayload(null, $model, $data));
-                });
-                continue;
-            }
-
-            if ($this->request->has($key)) {
-                $model = config('crud.models.plural') ? Str::plural($key) : Str::Singular($key);
-                $model = Str::studly($model);
-                $model = config('crud.namespacePrefix.models').'\\'.$model;
-
-                $data = $this->request->get($key);
-                $data[Str::snake(Str::singular(last(explode('\\', $this->model)))).'_id'] = $this->entity->id;
-
-                event($event::fromPayload(null, $model, $data));
-            }
-        }
     }
 }
