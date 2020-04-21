@@ -181,13 +181,13 @@ abstract class CrudEvent extends AbstractCrudEvent
 
     public function addModelId($name, $value = null): void
     {
-        if (typeOf($name) === 'string') {
+        if (gettype($name) === 'string') {
             $this->modelIds[$name] = $value;
 
             return;
         }
 
-        if (typeOf($name) === 'array') {
+        if (gettype($name) === 'array') {
             $this->modelIds = $this->modelIds + $name;
         }
     }

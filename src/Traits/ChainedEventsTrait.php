@@ -10,7 +10,7 @@ trait ChainedEventsTrait
 {
     public function handleChainedEvents()
     {
-        if (! $this instanceof ChainedEvents) {
+        if (! $this->event instanceof ChainedEvents) {
             return;
         }
 
