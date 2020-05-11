@@ -201,6 +201,7 @@ abstract class CrudListener
     protected function sendResponse($response, $statusCode = 200): void
     {
         $this->response->setContent($response)
+            ->header('Access-Control-Allow-Origin', '*')
             ->setStatusCode($statusCode)
             ->send();
     }
