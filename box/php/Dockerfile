@@ -1,4 +1,4 @@
-FROM php:7.3-fpm
+FROM php:7.4-fpm
 RUN apt-get update && apt-get install supervisor git zip -y
 RUN docker-php-ext-install pdo pdo_mysql
 RUN pecl install -o -f redis \

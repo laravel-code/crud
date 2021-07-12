@@ -4,6 +4,8 @@ namespace LaravelCode\Crud\Model;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
+use Response;
 
 trait CrudTrait
 {
@@ -23,7 +25,7 @@ trait CrudTrait
         );
         $withQuery($query);
 
-        \Response::json($query->paginate($this->perPage))
+        Response::json($query->paginate($this->perPage))
             ->setStatusCode(200)
             ->send();
     }
@@ -56,7 +58,7 @@ trait CrudTrait
         $list = explode(',', $includes);
         foreach ($list as $key => $item) {
             if (! in_array($item, $this->includes)) {
-                throw new \InvalidArgumentException('Include `'.$item.'` is not configured on the model');
+                throw new InvalidArgumentException('Include `'.$item.'` is not configured on the model');
             }
         }
         if (count($list)) {
@@ -138,7 +140,7 @@ trait CrudTrait
     public function scopeViewResource(Builder $query, $modelId, Request $request, $withQuery)
     {
         $resource = $this->scopeResource($query, $modelId, $request, $withQuery)->firstOrFail();
-        \Response::json($resource)
+        Response::json($resource)
             ->setStatusCode(200)
             ->send();
     }

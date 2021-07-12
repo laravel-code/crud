@@ -9,7 +9,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LaravelCode\Crud\Events\AbstractCrudEvent;
-use LaravelCode\Crud\Events\CrudEventInterface;
 use LaravelCode\Crud\Events\CrudEventLogger;
 use LaravelCode\Crud\Exceptions\ListenerModelException;
 use LaravelCode\Crud\Traits\ChainedEventsTrait;
