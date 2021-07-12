@@ -292,7 +292,6 @@ trait CrudControllerTrait
     protected function _store(Request $request)
     {
         $this->checkPipeline('store');
-
         event(call_user_func([$this->events['store'], 'fromPayload'],
             null,
             $this->model,

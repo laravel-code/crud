@@ -35,6 +35,10 @@ trait ListenerRunTrait
      */
     public function __get(string $field)
     {
+        if (! $this->entity) {
+            return;
+        }
+
         return $this->entity->{$field};
     }
 
@@ -53,7 +57,7 @@ trait ListenerRunTrait
     }
 
     /**
-     * Should the entity save be called when the enity is clean.
+     * Should the entity save be called when the entity is clean.
      * By default it will not, but when you have could that is
      * being executed e.g. beforeSave, afterSave and afterSaveFailed.
      *

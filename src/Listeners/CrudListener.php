@@ -148,7 +148,6 @@ abstract class CrudListener
             call_user_func([$this, $method], $value);
             Log::debug('Entity is dirty: '.$this->entity->isDirty());
         }
-
         Log::debug('Searching  afterRun: ');
         if (is_callable([$this, 'afterRun'])) {
             Log::debug('Found  afterRun: ');
