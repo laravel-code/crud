@@ -31,7 +31,7 @@ trait ListenerRunTrait
 
     /**
      * @param string $field
-     * @return mixed
+     * @return mixed | null
      */
     public function __get(string $field)
     {
