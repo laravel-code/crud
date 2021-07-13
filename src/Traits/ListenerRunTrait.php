@@ -36,7 +36,7 @@ trait ListenerRunTrait
     public function __get(string $field)
     {
         if (! $this->entity) {
-            return;
+            return null;
         }
 
         return $this->entity->{$field};
